@@ -11,10 +11,10 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../constants/colors';
 import { Festival } from '../constants/festivals';
+import { generateUuid } from '../utils/uuid';
 import {
   getAllFestivals,
   saveFestival,
@@ -22,7 +22,6 @@ import {
   getAllTickets,
   getTotalProfit,
 } from '../utils/storage';
-import { festivals as defaultFestivals } from '../constants/festivals';
 
 export default function AdminScreen() {
   const { user, logout } = useAuth();
@@ -45,25 +44,22 @@ export default function AdminScreen() {
 
   const loadData = async () => {
     try {
-      const storedFestivals = await getAllFestivals();
-      const allTickets = await getAllTickets();
-      const profit = await getTotalProfit();
-      
-      // If no festivals in storage, save default festivals
-      let allFestivals = storedFestivals;
+      const [storedFestivals, allTickets, profit] = await Promise.all([
+        getAllFestivals(),
+        getAllTickets(),
+        getTotalProfit(),
+      ]);
+
       if (storedFestivals.length === 0) {
-        // Save default festivals to storage
-        await AsyncStorage.setItem('festivals', JSON.stringify(defaultFestivals));
-        allFestivals = defaultFestivals;
+        setFestivals([]);
+      } else {
+        setFestivals(storedFestivals);
       }
-      
-      setFestivals(allFestivals);
       setTicketsCount(allTickets.length);
       setTotalProfit(profit);
     } catch (error) {
       console.error('Error loading data:', error);
-      // Fallback to default festivals on error
-      setFestivals(defaultFestivals);
+      setFestivals([]);
       setTicketsCount(0);
       setTotalProfit(0);
     }
@@ -124,12 +120,12 @@ export default function AdminScreen() {
     }
 
     const activities = festivalForm.activities
-      .split('،')
+      .split(/[,،]/)
       .map((a) => a.trim())
       .filter((a) => a.length > 0);
 
     const festival: Festival = {
-      id: editingFestival?.id || Date.now().toString(),
+      id: editingFestival?.id || generateUuid(),
       name: festivalForm.name,
       description: festivalForm.description,
       location: festivalForm.location,
@@ -578,4 +574,3 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
-

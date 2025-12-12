@@ -118,9 +118,8 @@ function AppNavigator() {
 export default function App() {
   return (
     <AuthProvider>
-      <StatusBar style="auto" />
+      <StatusBar style="light" />
       <AppNavigator />
     </AuthProvider>
   );
 }
-

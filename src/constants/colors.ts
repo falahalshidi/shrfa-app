@@ -1,15 +1,21 @@
 export const colors = {
-  primary: '#8B1A1A', // Dark red/maroon
-  secondary: '#4CAF50', // Green
-  lightGreen: '#A5D6A7', // Light green
-  beige: '#F5F5DC', // Beige
+  primary: '#8B1A1A', // Shurfa maroon
+  primaryDark: '#4E0909',
+  secondary: '#D97706', // Amber accent
+  accent: '#F4A261',
+  highlight: '#FBE7C6',
+  oasis: '#FFF4E3',
   white: '#FFFFFF',
   gray: '#757575',
-  lightGray: '#E0E0E0',
-  darkGray: '#424242',
-  text: '#212121',
-  textLight: '#757575',
-  background: '#FFFFFF',
-  cardBackground: '#E8F5E9', // Light blue-green
+  lightGray: '#E6D8CC',
+  darkGray: '#2E2E2E',
+  text: '#1F1F1F',
+  textLight: '#7A7A7A',
+  background: '#FFF8F2',
+  backgroundMuted: '#F7EEE5',
+  cardBackground: '#FFFBF6',
+  cardBorder: '#F0DED0',
+  success: '#4CAF50',
+  gradientPrimary: ['#B23A48', '#670C12'] as [string, string],
+  gradientSecondary: ['#F4A261', '#E76F51'] as [string, string],
 };
-

@@ -11,6 +11,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../constants/colors';
 
@@ -20,7 +21,7 @@ export default function RegisterScreen() {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const { register } = useAuth();
 
   const handleRegister = async () => {
@@ -41,7 +42,7 @@ export default function RegisterScreen() {
 
     const success = await register(name, email, password, phone || undefined);
     if (success) {
-      Alert.alert('نجح', 'تم إنشاء الحساب بنجاح', [
+      Alert.alert('نجح', 'تم إنشاء الحساب. تحقق من بريدك الإلكتروني لتفعيل الحساب ثم قم بتسجيل الدخول.', [
         { text: 'موافق', onPress: () => navigation.goBack() },
       ]);
     } else {
@@ -55,17 +56,38 @@ export default function RegisterScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.form}>
+        <LinearGradient
+          colors={colors.gradientSecondary}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.header}
+        >
+          <Text style={styles.headerTitle}>انضم إلى شرفة</Text>
+          <Text style={styles.headerSubtitle}>استكشف تراث عُمان وفعالياتها الحية</Text>
+        </LinearGradient>
+
+        <View style={styles.formCard}>
           <Text style={styles.title}>إنشاء حساب جديد</Text>
 
-          <TextInput
-            style={styles.input}
-            placeholder="الاسم الكامل"
-            placeholderTextColor={colors.textLight}
-            value={name}
-            onChangeText={setName}
-            textAlign="center"
-          />
+          <View style={styles.inputGrid}>
+            <TextInput
+              style={styles.input}
+              placeholder="الاسم الكامل"
+              placeholderTextColor={colors.textLight}
+              value={name}
+              onChangeText={setName}
+              textAlign="center"
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="رقم الهاتف (اختياري)"
+              placeholderTextColor={colors.textLight}
+              value={phone}
+              onChangeText={setPhone}
+              keyboardType="phone-pad"
+              textAlign="center"
+            />
+          </View>
 
           <TextInput
             style={styles.input}
@@ -75,16 +97,6 @@ export default function RegisterScreen() {
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
-            textAlign="center"
-          />
-
-          <TextInput
-            style={styles.input}
-            placeholder="رقم الهاتف (اختياري)"
-            placeholderTextColor={colors.textLight}
-            value={phone}
-            onChangeText={setPhone}
-            keyboardType="phone-pad"
             textAlign="center"
           />
 
@@ -111,6 +123,10 @@ export default function RegisterScreen() {
           <TouchableOpacity style={styles.button} onPress={handleRegister}>
             <Text style={styles.buttonText}>إنشاء الحساب</Text>
           </TouchableOpacity>
+
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <Text style={styles.backButtonText}>لديك حساب بالفعل؟ تسجيل الدخول</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -125,39 +141,79 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     padding: 20,
+    gap: 20,
   },
-  form: {
+  header: {
+    padding: 25,
+    borderRadius: 20,
+    alignItems: 'center',
+    gap: 6,
+  },
+  headerTitle: {
+    fontSize: 26,
+    color: colors.white,
+    fontWeight: '700',
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.85)',
+    textAlign: 'center',
+  },
+  formCard: {
     width: '100%',
-    marginTop: 20,
+    backgroundColor: colors.cardBackground,
+    padding: 24,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.07,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  inputGrid: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 12,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: 30,
+    color: colors.primary,
+    marginBottom: 24,
     textAlign: 'center',
   },
   input: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: 10,
+    flex: 1,
+    backgroundColor: colors.white,
+    borderRadius: 14,
     padding: 15,
     fontSize: 16,
     marginBottom: 15,
     textAlign: 'center',
     borderWidth: 1,
-    borderColor: colors.lightGray,
+    borderColor: colors.cardBorder,
   },
   button: {
     backgroundColor: colors.primary,
-    borderRadius: 10,
-    padding: 15,
+    borderRadius: 16,
+    padding: 16,
     alignItems: 'center',
     marginTop: 10,
   },
   buttonText: {
     color: colors.white,
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '600',
+  },
+  backButton: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  backButtonText: {
+    color: colors.secondary,
+    fontSize: 16,
+    fontWeight: '500',
   },
 });
-

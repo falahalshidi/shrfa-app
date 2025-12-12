@@ -3,6 +3,7 @@ import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { colors } from '../constants/colors';
 
 export default function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
@@ -10,12 +11,16 @@ export default function CustomTabBar({ state, descriptors, navigation }: BottomT
 
   return (
     <View style={[styles.container, { paddingBottom: Math.max(insets.bottom, 10) }]}>
-      {/* Curved top border */}
       <View style={styles.curveContainer}>
         <View style={styles.curve} />
       </View>
-      
-      <View style={styles.tabBar}>
+
+      <LinearGradient
+        colors={[colors.cardBackground, colors.white]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.tabBar}
+      >
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key];
           const label = options.tabBarLabel as string || options.title || route.name;
@@ -58,25 +63,28 @@ export default function CustomTabBar({ state, descriptors, navigation }: BottomT
               onPress={onPress}
               onLongPress={onLongPress}
               style={styles.tab}
+              activeOpacity={0.85}
             >
-              <Ionicons
-                name={iconName}
-                size={24}
-                color={isFocused ? colors.primary : colors.gray}
-              />
-              <Text
-                style={[
-                  styles.label,
-                  { color: isFocused ? colors.primary : colors.gray },
-                ]}
-              >
-                {label}
-              </Text>
-              {isFocused && <View style={styles.indicator} />}
+              <View style={[styles.tabContent, isFocused && styles.tabContentActive]}>
+                <Ionicons
+                  name={iconName}
+                  size={22}
+                  color={isFocused ? colors.primary : colors.gray}
+                />
+                <Text
+                  style={[
+                    styles.label,
+                    { color: isFocused ? colors.primary : colors.gray },
+                  ]}
+                >
+                  {label}
+                </Text>
+                {isFocused && <View style={styles.indicator} />}
+              </View>
             </TouchableOpacity>
           );
         })}
-      </View>
+      </LinearGradient>
     </View>
   );
 }
@@ -106,9 +114,9 @@ const styles = StyleSheet.create({
   },
   tabBar: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
     paddingTop: 10,
-    paddingHorizontal: 10,
+    paddingHorizontal: 14,
+    paddingBottom: 12,
     borderTopWidth: 0,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -2 },
@@ -120,8 +128,18 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingVertical: 4,
+  },
+  tabContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 18,
     paddingVertical: 8,
+    width: '100%',
     position: 'relative',
+  },
+  tabContentActive: {
+    backgroundColor: colors.oasis,
   },
   label: {
     fontSize: 12,
@@ -130,11 +148,10 @@ const styles = StyleSheet.create({
   },
   indicator: {
     position: 'absolute',
-    top: 0,
-    width: 40,
+    bottom: -2,
+    width: 26,
     height: 3,
     backgroundColor: colors.primary,
     borderRadius: 2,
   },
 });
-

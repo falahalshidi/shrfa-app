@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   RefreshControl,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
@@ -15,7 +17,7 @@ import { getTicketsByUser } from '../utils/storage';
 import { Ticket } from '../types';
 
 export default function MyTicketsScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const { user, logout } = useAuth();
   const insets = useSafeAreaInsets();
   const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -57,9 +59,15 @@ export default function MyTicketsScreen() {
   if (tickets.length === 0) {
     return (
       <View style={styles.container}>
-        <View style={styles.header}>
+        <LinearGradient
+          colors={colors.gradientPrimary}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={[styles.header, { paddingTop: insets.top + 30 }]}
+        >
           <Text style={styles.headerTitle}>تذاكري</Text>
-        </View>
+          <Text style={styles.headerSubtitle}>تابع حجوزاتك الحالية والقادمة</Text>
+        </LinearGradient>
         <ScrollView
           contentContainerStyle={[styles.emptyContainer, { paddingBottom: 100 + insets.bottom }]}
           refreshControl={
@@ -77,13 +85,22 @@ export default function MyTicketsScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={logout} style={styles.logoutButton}>
-          <Text style={styles.logoutText}>تسجيل الخروج</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>تذاكري</Text>
-        <View style={styles.logoutButton} />
-      </View>
+      <LinearGradient
+        colors={colors.gradientPrimary}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[styles.header, { paddingTop: insets.top + 30 }]}
+      >
+        <View style={styles.headerRow}>
+          <TouchableOpacity onPress={logout} style={styles.logoutButton}>
+            <Ionicons name="log-out-outline" size={18} color={colors.white} />
+            <Text style={styles.logoutText}>خروج</Text>
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>تذاكري</Text>
+          <View style={{ width: 60 }} />
+        </View>
+        <Text style={styles.headerSubtitle}>تابع حجوزاتك الحالية والقادمة</Text>
+      </LinearGradient>
       <ScrollView
         style={styles.content}
         contentContainerStyle={{ paddingBottom: 100 + insets.bottom }}
@@ -95,9 +112,7 @@ export default function MyTicketsScreen() {
           <TouchableOpacity
             key={ticket.id}
             style={styles.ticketCard}
-            onPress={() =>
-              navigation.navigate('TicketDetail' as never, { ticket } as never)
-            }
+            onPress={() => navigation.navigate('TicketDetail' as never, { ticket } as never)}
           >
             <View style={styles.ticketHeader}>
               <Text style={styles.ticketFestivalName}>{ticket.festivalName}</Text>
@@ -129,29 +144,40 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   header: {
-    backgroundColor: colors.primary,
     padding: 20,
-    paddingTop: 50,
-    flexDirection: 'row',
-    justifyContent: 'center',
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
     alignItems: 'center',
-    position: 'relative',
+  },
+  headerRow: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
   },
   headerTitle: {
     fontSize: 28,
     fontWeight: 'bold',
     color: colors.white,
     textAlign: 'center',
-    flex: 1,
+  },
+  headerSubtitle: {
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: 14,
   },
   logoutButton: {
-    padding: 8,
-    position: 'absolute',
-    left: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 20,
   },
   logoutText: {
     color: colors.white,
-    fontSize: 14,
+    fontSize: 13,
   },
   content: {
     flex: 1,
@@ -237,4 +263,3 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
-

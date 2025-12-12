@@ -13,7 +13,7 @@ export interface Festival {
 
 export const festivals: Festival[] = [
   {
-    id: '1',
+    id: 'f4e03b10-403d-4d07-8e94-4d4974c2cb3d',
     name: 'مهرجان صحار الترفيهي',
     description: 'مهرجان سنوي يقام في مركز صحار الترفيهي يتضمن فعاليات ثقافية وترفيهية وعروض تراثية وأسواق شعبية',
     location: 'مركز صحار الترفيهي، ولاية صحار',
@@ -28,4 +28,3 @@ export const festivals: Festival[] = [
     price: 500, // 500 Baisa
   },
 ];
-

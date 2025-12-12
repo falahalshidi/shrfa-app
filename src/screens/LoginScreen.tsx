@@ -11,13 +11,14 @@ import {
   ScrollView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../constants/colors';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const { login } = useAuth();
 
   const handleLogin = async () => {
@@ -40,34 +41,40 @@ export default function LoginScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
+        <LinearGradient
+          colors={colors.gradientPrimary}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.header}
+        >
           <Text style={styles.logo}>شرفة</Text>
           <Text style={styles.tagline}>من الأصالة والتراث - تبدأ الحكاية</Text>
-        </View>
+        </LinearGradient>
 
-        <View style={styles.form}>
+        <View style={styles.formCard}>
           <Text style={styles.title}>تسجيل الدخول</Text>
 
-          <TextInput
-            style={styles.input}
-            placeholder="البريد الإلكتروني"
-            placeholderTextColor={colors.textLight}
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            textAlign="center"
-          />
-
-          <TextInput
-            style={styles.input}
-            placeholder="كلمة المرور"
-            placeholderTextColor={colors.textLight}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            textAlign="center"
-          />
+          <View style={styles.inputGroup}>
+            <TextInput
+              style={styles.input}
+              placeholder="البريد الإلكتروني"
+              placeholderTextColor={colors.textLight}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              textAlign="center"
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="كلمة المرور"
+              placeholderTextColor={colors.textLight}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              textAlign="center"
+            />
+          </View>
 
           <TouchableOpacity style={styles.button} onPress={handleLogin}>
             <Text style={styles.buttonText}>تسجيل الدخول</Text>
@@ -94,61 +101,75 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
     padding: 20,
+    gap: 20,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 40,
+    padding: 30,
+    borderRadius: 24,
+    gap: 8,
   },
   logo: {
-    fontSize: 48,
-    fontWeight: 'bold',
-    color: colors.primary,
-    marginBottom: 10,
+    fontSize: 50,
+    fontWeight: '700',
+    color: colors.white,
   },
   tagline: {
     fontSize: 14,
-    color: colors.textLight,
+    color: 'rgba(255,255,255,0.8)',
     textAlign: 'center',
   },
-  form: {
+  formCard: {
     width: '100%',
+    backgroundColor: colors.cardBackground,
+    borderRadius: 24,
+    padding: 25,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.07,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  inputGroup: {
+    gap: 12,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: 30,
+    color: colors.primary,
+    marginBottom: 24,
     textAlign: 'center',
   },
   input: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: 10,
-    padding: 15,
+    backgroundColor: colors.white,
+    borderRadius: 14,
+    padding: 16,
     fontSize: 16,
-    marginBottom: 15,
     textAlign: 'center',
     borderWidth: 1,
-    borderColor: colors.lightGray,
+    borderColor: colors.cardBorder,
   },
   button: {
     backgroundColor: colors.primary,
-    borderRadius: 10,
-    padding: 15,
+    borderRadius: 16,
+    paddingVertical: 15,
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 25,
   },
   buttonText: {
     color: colors.white,
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
   linkButton: {
     marginTop: 20,
     alignItems: 'center',
   },
   linkText: {
-    color: colors.primary,
+    color: colors.secondary,
     fontSize: 16,
+    fontWeight: '500',
   },
 });
-

@@ -7,22 +7,20 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../constants/colors';
 import { Festival } from '../constants/festivals';
-import {
-  saveTicket,
-  getDailyBookingCount,
-  incrementDailyBooking,
-  saveBooking,
-} from '../utils/storage';
+import { saveTicket, getDailyBookingCount, saveBooking } from '../utils/storage';
 import { generateBarcode, generateTicketNumber } from '../utils/barcode';
 import { Ticket, Booking } from '../types';
+import { generateUuid } from '../utils/uuid';
 
 export default function FestivalDetailsScreen() {
   const route = useRoute();
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const { user } = useAuth();
   const { festival } = route.params as { festival: Festival };
   const [quantity, setQuantity] = useState(1);
@@ -67,11 +65,13 @@ export default function FestivalDetailsScreen() {
     const totalPrice = festival.price * quantity;
     const tickets: Ticket[] = [];
     const purchaseDate = new Date().toISOString();
+    const bookingId = generateUuid();
 
     // Create individual tickets
     for (let i = 0; i < quantity; i++) {
       const ticket: Ticket = {
-        id: `${Date.now()}-${i}`,
+        id: generateUuid(),
+        bookingId,
         festivalId: festival.id,
         festivalName: festival.name,
         userId: user.id,
@@ -82,25 +82,20 @@ export default function FestivalDetailsScreen() {
         ticketNumber: generateTicketNumber(),
       };
       tickets.push(ticket);
-      await saveTicket(ticket);
     }
 
     // Create booking record
     const booking: Booking = {
-      id: Date.now().toString(),
+      id: bookingId,
       festivalId: festival.id,
       userId: user.id,
       quantity,
       totalPrice,
       purchaseDate,
-      tickets,
     };
     await saveBooking(booking);
-
-    // Update daily booking count
-    await incrementDailyBooking(user.id, today, quantity);
-
-    // Profit is automatically calculated from tickets, no need to add manually
+    await Promise.all(tickets.map((ticket) => saveTicket(ticket)));
+    await loadDailyBookings();
 
     Alert.alert(
       'نجح',
@@ -108,7 +103,7 @@ export default function FestivalDetailsScreen() {
       [
         {
           text: 'عرض التذاكر',
-          onPress: () => navigation.navigate('MyTickets' as never),
+          onPress: () => navigation.navigate('MyTickets'),
         },
         { text: 'موافق' },
       ]
@@ -119,35 +114,56 @@ export default function FestivalDetailsScreen() {
   };
 
   const today = new Date().toISOString().split('T')[0];
-  const available = 20 - dailyBooked;
+  const available = Math.max(0, 20 - dailyBooked);
 
   return (
     <ScrollView style={styles.container}>
+      <LinearGradient
+        colors={colors.gradientPrimary}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.hero}
+      >
+        <View style={styles.heroHeader}>
+          <View>
+            <Text style={styles.heroTitle}>{festival.name}</Text>
+            <Text style={styles.heroSubtitle}>{festival.location}</Text>
+          </View>
+          <View style={styles.priceTag}>
+            <Text style={styles.priceTagLabel}>السعر</Text>
+            <Text style={styles.priceTagValue}>{festival.price} بيسة</Text>
+          </View>
+        </View>
+        <View style={styles.heroMeta}>
+          <View style={styles.metaItem}>
+            <Ionicons name="calendar-outline" size={18} color={colors.white} />
+            <Text style={styles.metaText}>{festival.startDate} - {festival.endDate}</Text>
+          </View>
+          <View style={styles.metaItem}>
+            <Ionicons name="time-outline" size={18} color={colors.white} />
+            <Text style={styles.metaText}>{festival.workingHours}</Text>
+          </View>
+        </View>
+      </LinearGradient>
+
       <View style={styles.detailsCard}>
         <Text style={styles.cardTitle}>تفاصيل المهرجان</Text>
-
-        <View style={styles.detailRow}>
-          <Text style={styles.detailIcon}>📅</Text>
-          <Text style={styles.detailText}>
-            التاريخ: {festival.startDate} - {festival.endDate}
-          </Text>
-        </View>
-
-        <View style={styles.detailRow}>
-          <Text style={styles.detailIcon}>🕐</Text>
-          <Text style={styles.detailText}>ساعات العمل: {festival.workingHours}</Text>
-        </View>
-
-        <View style={styles.detailRow}>
-          <Text style={styles.detailIcon}>📍</Text>
-          <Text style={styles.detailText}>الموقع: {festival.location}</Text>
-        </View>
-
-        <View style={styles.detailRow}>
-          <Text style={styles.detailIcon}>🎭</Text>
-          <Text style={styles.detailText}>
-            الأنشطة: {festival.activities.join('، ')}
-          </Text>
+        {[
+          { icon: 'map-outline', value: festival.location },
+          { icon: 'calendar-outline', value: `${festival.startDate} - ${festival.endDate}` },
+          { icon: 'time-outline', value: festival.workingHours },
+        ].map((detail) => (
+          <View key={detail.value} style={styles.detailRow}>
+            <Ionicons name={detail.icon as any} size={20} color={colors.primary} />
+            <Text style={styles.detailText}>{detail.value}</Text>
+          </View>
+        ))}
+        <View style={styles.activitiesWrap}>
+          {festival.activities.map((activity) => (
+            <View key={activity} style={styles.activityPill}>
+              <Text style={styles.activityText}>{activity}</Text>
+            </View>
+          ))}
         </View>
       </View>
 
@@ -210,11 +226,70 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
+  hero: {
+    margin: 20,
+    marginBottom: 0,
+    padding: 24,
+    borderRadius: 26,
+    gap: 18,
+  },
+  heroHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  heroTitle: {
+    fontSize: 26,
+    color: colors.white,
+    fontWeight: '700',
+  },
+  heroSubtitle: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.85)',
+    marginTop: 4,
+  },
+  priceTag: {
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 16,
+    alignItems: 'center',
+  },
+  priceTagLabel: {
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: 12,
+  },
+  priceTagValue: {
+    color: colors.white,
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  heroMeta: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  metaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  metaText: {
+    color: colors.white,
+    fontSize: 14,
+  },
   detailsCard: {
     backgroundColor: colors.cardBackground,
-    margin: 15,
-    padding: 20,
-    borderRadius: 15,
+    margin: 20,
+    marginTop: 15,
+    padding: 22,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
   },
   cardTitle: {
     fontSize: 20,
@@ -226,21 +301,33 @@ const styles = StyleSheet.create({
   detailRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    gap: 10,
     marginBottom: 12,
-  },
-  detailIcon: {
-    fontSize: 20,
-    marginRight: 10,
   },
   detailText: {
     fontSize: 16,
     color: colors.text,
-    textAlign: 'center',
+    flex: 1,
+  },
+  activitiesWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginTop: 10,
+  },
+  activityPill: {
+    backgroundColor: colors.highlight,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  activityText: {
+    color: colors.primary,
+    fontWeight: '500',
   },
   quantitySection: {
-    margin: 15,
-    marginTop: 0,
+    marginHorizontal: 20,
+    marginTop: 10,
   },
   sectionTitle: {
     fontSize: 20,
@@ -258,7 +345,7 @@ const styles = StyleSheet.create({
   quantityButton: {
     width: 50,
     height: 50,
-    backgroundColor: colors.secondary,
+    backgroundColor: colors.primary,
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
@@ -291,11 +378,13 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   pricingSection: {
-    margin: 15,
+    margin: 20,
     marginTop: 0,
-    backgroundColor: colors.white,
-    padding: 20,
-    borderRadius: 15,
+    backgroundColor: colors.cardBackground,
+    padding: 22,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
   },
   priceRow: {
     flexDirection: 'column',
@@ -330,29 +419,30 @@ const styles = StyleSheet.create({
   },
   purchaseButton: {
     backgroundColor: colors.secondary,
-    margin: 15,
+    marginHorizontal: 20,
+    marginTop: 10,
     padding: 18,
-    borderRadius: 10,
+    borderRadius: 18,
     alignItems: 'center',
   },
   purchaseButtonText: {
     color: colors.white,
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
   helpButton: {
     backgroundColor: colors.primary,
-    margin: 15,
-    marginTop: 0,
-    padding: 12,
-    borderRadius: 8,
+    marginHorizontal: 20,
+    marginTop: 15,
+    marginBottom: 20,
+    padding: 14,
+    borderRadius: 12,
     alignItems: 'center',
     alignSelf: 'center',
   },
   helpButtonText: {
     color: colors.white,
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
 });
-

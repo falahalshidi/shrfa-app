@@ -3,11 +3,12 @@ export interface User {
   email: string;
   name: string;
   phone?: string;
-  isAdmin?: boolean;
+  isAdmin: boolean;
 }
 
 export interface Ticket {
   id: string;
+  bookingId: string;
   festivalId: string;
   festivalName: string;
   userId: string;
@@ -25,6 +26,5 @@ export interface Booking {
   quantity: number;
   totalPrice: number;
   purchaseDate: string;
-  tickets: Ticket[];
+  tickets?: Ticket[];
 }
-

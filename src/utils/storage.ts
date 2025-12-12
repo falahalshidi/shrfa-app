@@ -1,30 +1,102 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from '../lib/supabase';
+import { Tables } from '../types/database';
 import { Ticket, Booking } from '../types';
 import { Festival } from '../constants/festivals';
 
-const TICKETS_KEY = 'tickets';
-const BOOKINGS_KEY = 'bookings';
-const DAILY_BOOKINGS_KEY = 'daily_bookings';
-const PROFIT_KEY = 'total_profit';
-const FESTIVALS_KEY = 'festivals';
+const mapTicket = (row: Tables<'tickets'>): Ticket => ({
+  id: row.id,
+  bookingId: row.booking_id,
+  festivalId: row.festival_id,
+  festivalName: row.festival_name,
+  userId: row.user_id,
+  purchaseDate: row.purchase_date,
+  quantity: 1,
+  totalPrice: row.price_baisa,
+  barcode: row.barcode,
+  ticketNumber: row.ticket_number,
+});
+
+const mapBooking = (row: Tables<'bookings'>): Booking => ({
+  id: row.id,
+  festivalId: row.festival_id,
+  userId: row.user_id,
+  quantity: row.quantity,
+  totalPrice: row.total_price_baisa,
+  purchaseDate: row.purchase_date,
+});
+
+const mapFestival = (row: Tables<'festivals'>): Festival => ({
+  id: row.id,
+  name: row.name,
+  description: row.description,
+  location: row.location,
+  startDate: row.start_date,
+  endDate: row.end_date,
+  workingHours: row.working_hours,
+  activities: row.activities || [],
+  price: row.price_baisa,
+  image: row.image_url || undefined,
+});
 
 export async function saveTicket(ticket: Ticket): Promise<void> {
   try {
-    const ticketsData = await AsyncStorage.getItem(TICKETS_KEY);
-    const tickets = ticketsData ? JSON.parse(ticketsData) : [];
-    tickets.push(ticket);
-    await AsyncStorage.setItem(TICKETS_KEY, JSON.stringify(tickets));
+    if (!ticket.bookingId) {
+      throw new Error('ticket.bookingId is required');
+    }
+    const { error } = await supabase.from('tickets').insert({
+      id: ticket.id,
+      booking_id: ticket.bookingId,
+      festival_id: ticket.festivalId,
+      festival_name: ticket.festivalName,
+      user_id: ticket.userId,
+      purchase_date: ticket.purchaseDate,
+      price_baisa: ticket.totalPrice,
+      barcode: ticket.barcode,
+      ticket_number: ticket.ticketNumber,
+    });
+
+    if (error) {
+      throw error;
+    }
   } catch (error) {
     console.error('Error saving ticket:', error);
     throw error;
   }
 }
 
+export async function saveBooking(booking: Booking): Promise<void> {
+  try {
+    const { error } = await supabase.from('bookings').insert({
+      id: booking.id,
+      festival_id: booking.festivalId,
+      user_id: booking.userId,
+      quantity: booking.quantity,
+      total_price_baisa: booking.totalPrice,
+      purchase_date: booking.purchaseDate,
+    });
+
+    if (error) {
+      throw error;
+    }
+  } catch (error) {
+    console.error('Error saving booking:', error);
+    throw error;
+  }
+}
+
 export async function getTicketsByUser(userId: string): Promise<Ticket[]> {
   try {
-    const ticketsData = await AsyncStorage.getItem(TICKETS_KEY);
-    const tickets = ticketsData ? JSON.parse(ticketsData) : [];
-    return tickets.filter((t: Ticket) => t.userId === userId);
+    const { data, error } = await supabase
+      .from('tickets')
+      .select('*')
+      .eq('user_id', userId)
+      .order('purchase_date', { ascending: false });
+
+    if (error) {
+      throw error;
+    }
+
+    return (data || []).map(mapTicket);
   } catch (error) {
     console.error('Error getting tickets:', error);
     return [];
@@ -33,64 +105,60 @@ export async function getTicketsByUser(userId: string): Promise<Ticket[]> {
 
 export async function getTicketsByFestival(festivalId: string): Promise<Ticket[]> {
   try {
-    const ticketsData = await AsyncStorage.getItem(TICKETS_KEY);
-    const tickets = ticketsData ? JSON.parse(ticketsData) : [];
-    return tickets.filter((t: Ticket) => t.festivalId === festivalId);
+    const { data, error } = await supabase
+      .from('tickets')
+      .select('*')
+      .eq('festival_id', festivalId);
+
+    if (error) {
+      throw error;
+    }
+
+    return (data || []).map(mapTicket);
   } catch (error) {
-    console.error('Error getting tickets:', error);
+    console.error('Error getting tickets by festival:', error);
     return [];
   }
 }
 
-export async function getDailyBookingCount(
-  userId: string,
-  date: string
-): Promise<number> {
+export async function getDailyBookingCount(userId: string, date: string): Promise<number> {
   try {
-    const dailyBookingsData = await AsyncStorage.getItem(DAILY_BOOKINGS_KEY);
-    const dailyBookings = dailyBookingsData ? JSON.parse(dailyBookingsData) : {};
-    const key = `${userId}_${date}`;
-    return dailyBookings[key] || 0;
+    const start = new Date(`${date}T00:00:00.000Z`).toISOString();
+    const endDate = new Date(`${date}T00:00:00.000Z`);
+    endDate.setDate(endDate.getDate() + 1);
+    const end = endDate.toISOString();
+
+    const { data, error } = await supabase
+      .from('bookings')
+      .select('quantity, purchase_date')
+      .eq('user_id', userId)
+      .gte('purchase_date', start)
+      .lt('purchase_date', end);
+
+    if (error) {
+      throw error;
+    }
+
+    return (data || []).reduce((sum, row) => sum + (row.quantity || 0), 0);
   } catch (error) {
     console.error('Error getting daily booking count:', error);
     return 0;
   }
 }
 
-export async function incrementDailyBooking(
-  userId: string,
-  date: string,
-  count: number
-): Promise<void> {
-  try {
-    const dailyBookingsData = await AsyncStorage.getItem(DAILY_BOOKINGS_KEY);
-    const dailyBookings = dailyBookingsData ? JSON.parse(dailyBookingsData) : {};
-    const key = `${userId}_${date}`;
-    dailyBookings[key] = (dailyBookings[key] || 0) + count;
-    await AsyncStorage.setItem(DAILY_BOOKINGS_KEY, JSON.stringify(dailyBookings));
-  } catch (error) {
-    console.error('Error incrementing daily booking:', error);
-    throw error;
-  }
-}
-
-export async function saveBooking(booking: Booking): Promise<void> {
-  try {
-    const bookingsData = await AsyncStorage.getItem(BOOKINGS_KEY);
-    const bookings = bookingsData ? JSON.parse(bookingsData) : [];
-    bookings.push(booking);
-    await AsyncStorage.setItem(BOOKINGS_KEY, JSON.stringify(bookings));
-  } catch (error) {
-    console.error('Error saving booking:', error);
-    throw error;
-  }
-}
-
 export async function getBookingsByUser(userId: string): Promise<Booking[]> {
   try {
-    const bookingsData = await AsyncStorage.getItem(BOOKINGS_KEY);
-    const bookings = bookingsData ? JSON.parse(bookingsData) : [];
-    return bookings.filter((b: Booking) => b.userId === userId);
+    const { data, error } = await supabase
+      .from('bookings')
+      .select('*')
+      .eq('user_id', userId)
+      .order('purchase_date', { ascending: false });
+
+    if (error) {
+      throw error;
+    }
+
+    return (data || []).map(mapBooking);
   } catch (error) {
     console.error('Error getting bookings:', error);
     return [];
@@ -99,8 +167,16 @@ export async function getBookingsByUser(userId: string): Promise<Booking[]> {
 
 export async function getAllTickets(): Promise<Ticket[]> {
   try {
-    const ticketsData = await AsyncStorage.getItem(TICKETS_KEY);
-    return ticketsData ? JSON.parse(ticketsData) : [];
+    const { data, error } = await supabase
+      .from('tickets')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw error;
+    }
+
+    return (data || []).map(mapTicket);
   } catch (error) {
     console.error('Error getting all tickets:', error);
     return [];
@@ -109,41 +185,33 @@ export async function getAllTickets(): Promise<Ticket[]> {
 
 export async function getAllBookings(): Promise<Booking[]> {
   try {
-    const bookingsData = await AsyncStorage.getItem(BOOKINGS_KEY);
-    return bookingsData ? JSON.parse(bookingsData) : [];
+    const { data, error } = await supabase
+      .from('bookings')
+      .select('*')
+      .order('purchase_date', { ascending: false });
+
+    if (error) {
+      throw error;
+    }
+
+    return (data || []).map(mapBooking);
   } catch (error) {
     console.error('Error getting all bookings:', error);
     return [];
   }
 }
 
-export async function addProfit(amount: number): Promise<void> {
-  try {
-    const currentProfit = await getTotalProfit();
-    const newProfit = currentProfit + amount;
-    await AsyncStorage.setItem(PROFIT_KEY, JSON.stringify(newProfit));
-  } catch (error) {
-    console.error('Error adding profit:', error);
-    throw error;
-  }
-}
-
 export async function getTotalProfit(): Promise<number> {
   try {
-    // Always calculate profit from existing tickets to ensure accuracy
-    const allTickets = await getAllTickets();
-    
-    // Calculate profit by summing all ticket prices
-    const calculatedProfit = allTickets.reduce((sum, ticket) => {
-      // Ensure totalPrice exists and is a valid number
-      const price = ticket.totalPrice || 0;
-      return sum + (typeof price === 'number' ? price : 0);
-    }, 0);
-    
-    // Always update stored profit to match calculated value
-    await AsyncStorage.setItem(PROFIT_KEY, JSON.stringify(calculatedProfit));
-    
-    return calculatedProfit;
+    const { data, error } = await supabase
+      .from('bookings')
+      .select('total_price_baisa');
+
+    if (error) {
+      throw error;
+    }
+
+    return (data || []).reduce((sum, row) => sum + (row.total_price_baisa || 0), 0);
   } catch (error) {
     console.error('Error getting total profit:', error);
     return 0;
@@ -152,17 +220,22 @@ export async function getTotalProfit(): Promise<number> {
 
 export async function saveFestival(festival: Festival): Promise<void> {
   try {
-    const festivalsData = await AsyncStorage.getItem(FESTIVALS_KEY);
-    const festivals = festivalsData ? JSON.parse(festivalsData) : [];
-    const existingIndex = festivals.findIndex((f: Festival) => f.id === festival.id);
-    
-    if (existingIndex >= 0) {
-      festivals[existingIndex] = festival;
-    } else {
-      festivals.push(festival);
+    const { error } = await supabase.from('festivals').upsert({
+      id: festival.id,
+      name: festival.name,
+      description: festival.description,
+      location: festival.location,
+      start_date: festival.startDate,
+      end_date: festival.endDate,
+      working_hours: festival.workingHours,
+      activities: festival.activities,
+      price_baisa: festival.price,
+      image_url: festival.image || null,
+    });
+
+    if (error) {
+      throw error;
     }
-    
-    await AsyncStorage.setItem(FESTIVALS_KEY, JSON.stringify(festivals));
   } catch (error) {
     console.error('Error saving festival:', error);
     throw error;
@@ -171,8 +244,16 @@ export async function saveFestival(festival: Festival): Promise<void> {
 
 export async function getAllFestivals(): Promise<Festival[]> {
   try {
-    const festivalsData = await AsyncStorage.getItem(FESTIVALS_KEY);
-    return festivalsData ? JSON.parse(festivalsData) : [];
+    const { data, error } = await supabase
+      .from('festivals')
+      .select('*')
+      .order('start_date', { ascending: true });
+
+    if (error) {
+      throw error;
+    }
+
+    return (data || []).map(mapFestival);
   } catch (error) {
     console.error('Error getting festivals:', error);
     return [];
@@ -181,13 +262,12 @@ export async function getAllFestivals(): Promise<Festival[]> {
 
 export async function deleteFestival(festivalId: string): Promise<void> {
   try {
-    const festivalsData = await AsyncStorage.getItem(FESTIVALS_KEY);
-    const festivals = festivalsData ? JSON.parse(festivalsData) : [];
-    const filtered = festivals.filter((f: Festival) => f.id !== festivalId);
-    await AsyncStorage.setItem(FESTIVALS_KEY, JSON.stringify(filtered));
+    const { error } = await supabase.from('festivals').delete().eq('id', festivalId);
+    if (error) {
+      throw error;
+    }
   } catch (error) {
     console.error('Error deleting festival:', error);
     throw error;
   }
 }
-
