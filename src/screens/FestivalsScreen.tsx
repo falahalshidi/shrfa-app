@@ -16,6 +16,7 @@ import { festivals as defaultFestivals } from '../constants/festivals';
 import { colors } from '../constants/colors';
 import { getAllFestivals } from '../utils/storage';
 import { Festival } from '../constants/festivals';
+import Logo from '../components/Logo';
 
 export default function FestivalsScreen() {
   const navigation = useNavigation<any>();
@@ -64,8 +65,9 @@ export default function FestivalsScreen() {
             <Text style={styles.logoutText}>تسجيل الخروج</Text>
           </TouchableOpacity>
         </View>
-        <Text style={styles.headerTitle}>شرفة</Text>
-        <Text style={styles.headerSubtitle}>من الأصالة والتراث - تبدأ الحكاية</Text>
+        <View style={styles.logoWrapper}>
+          <Logo size={180} showTagline={false} />
+        </View>
         <View style={styles.headerBadges}>
           <View style={styles.badge}>
             <Text style={styles.badgeLabel}>فعاليات مختارة</Text>
@@ -191,16 +193,9 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontSize: 14,
   },
-  headerTitle: {
-    fontSize: 36,
-    fontWeight: '700',
-    color: colors.white,
+  logoWrapper: {
     marginTop: 10,
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.8)',
-    marginTop: 4,
+    marginBottom: 4,
   },
   headerBadges: {
     flexDirection: 'row',

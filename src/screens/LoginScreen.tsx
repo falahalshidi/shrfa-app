@@ -14,6 +14,7 @@ import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../constants/colors';
+import Logo from '../components/Logo';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -41,15 +42,9 @@ export default function LoginScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <LinearGradient
-          colors={colors.gradientPrimary}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.header}
-        >
-          <Text style={styles.logo}>شرفة</Text>
-          <Text style={styles.tagline}>من الأصالة والتراث - تبدأ الحكاية</Text>
-        </LinearGradient>
+        <View style={styles.header}>
+          <Logo size={280} showTagline={true} />
+        </View>
 
         <View style={styles.formCard}>
           <Text style={styles.title}>تسجيل الدخول</Text>
@@ -105,19 +100,11 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
+    justifyContent: 'center',
     padding: 30,
     borderRadius: 24,
-    gap: 8,
-  },
-  logo: {
-    fontSize: 50,
-    fontWeight: '700',
-    color: colors.white,
-  },
-  tagline: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.8)',
-    textAlign: 'center',
+    backgroundColor: '#000000',
+    minHeight: 220,
   },
   formCard: {
     width: '100%',

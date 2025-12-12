@@ -14,6 +14,7 @@ import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../constants/colors';
+import Logo from '../components/Logo';
 
 export default function RegisterScreen() {
   const [name, setName] = useState('');
@@ -56,15 +57,9 @@ export default function RegisterScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <LinearGradient
-          colors={colors.gradientSecondary}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.header}
-        >
-          <Text style={styles.headerTitle}>انضم إلى شرفة</Text>
-          <Text style={styles.headerSubtitle}>استكشف تراث عُمان وفعالياتها الحية</Text>
-        </LinearGradient>
+        <View style={styles.header}>
+          <Logo size={260} showTagline={true} />
+        </View>
 
         <View style={styles.formCard}>
           <Text style={styles.title}>إنشاء حساب جديد</Text>
@@ -147,17 +142,9 @@ const styles = StyleSheet.create({
     padding: 25,
     borderRadius: 20,
     alignItems: 'center',
-    gap: 6,
-  },
-  headerTitle: {
-    fontSize: 26,
-    color: colors.white,
-    fontWeight: '700',
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.85)',
-    textAlign: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#000000',
+    minHeight: 200,
   },
   formCard: {
     width: '100%',
