@@ -126,8 +126,8 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: 'column',
+    alignItems: 'center',
     marginBottom: 15,
     paddingBottom: 15,
     borderBottomWidth: 1,
@@ -136,13 +136,14 @@ const styles = StyleSheet.create({
   detailLabel: {
     fontSize: 16,
     color: colors.textLight,
-    textAlign: 'right',
+    textAlign: 'center',
+    marginBottom: 5,
   },
   detailValue: {
     fontSize: 16,
     fontWeight: 'bold',
     color: colors.text,
-    textAlign: 'left',
+    textAlign: 'center',
   },
   footer: {
     marginTop: 30,

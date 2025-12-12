@@ -13,26 +13,21 @@ import MyTicketsScreen from './src/screens/MyTicketsScreen';
 import TicketDetailScreen from './src/screens/TicketDetailScreen';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { colors } from './src/constants/colors';
+import CustomTabBar from './src/components/CustomTabBar';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-// Force RTL
-I18nManager.forceRTL(true);
-I18nManager.allowRTL(true);
+// Disable RTL to center content
+I18nManager.forceRTL(false);
+I18nManager.allowRTL(false);
 
 function MainTabs() {
   return (
     <Tab.Navigator
+      tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.gray,
-        tabBarStyle: {
-          backgroundColor: '#fff',
-          borderTopWidth: 1,
-          borderTopColor: '#e0e0e0',
-        },
       }}
     >
       <Tab.Screen

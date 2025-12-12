@@ -8,6 +8,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../constants/colors';
 import { getTicketsByUser } from '../utils/storage';
@@ -16,6 +17,7 @@ import { Ticket } from '../types';
 export default function MyTicketsScreen() {
   const navigation = useNavigation();
   const { user, logout } = useAuth();
+  const insets = useSafeAreaInsets();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -59,7 +61,7 @@ export default function MyTicketsScreen() {
           <Text style={styles.headerTitle}>تذاكري</Text>
         </View>
         <ScrollView
-          contentContainerStyle={styles.emptyContainer}
+          contentContainerStyle={[styles.emptyContainer, { paddingBottom: 100 + insets.bottom }]}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
@@ -76,13 +78,15 @@ export default function MyTicketsScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>تذاكري</Text>
         <TouchableOpacity onPress={logout} style={styles.logoutButton}>
           <Text style={styles.logoutText}>تسجيل الخروج</Text>
         </TouchableOpacity>
+        <Text style={styles.headerTitle}>تذاكري</Text>
+        <View style={styles.logoutButton} />
       </View>
       <ScrollView
         style={styles.content}
+        contentContainerStyle={{ paddingBottom: 100 + insets.bottom }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
@@ -132,16 +136,21 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 50,
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
+    position: 'relative',
   },
   headerTitle: {
     fontSize: 28,
     fontWeight: 'bold',
     color: colors.white,
+    textAlign: 'center',
+    flex: 1,
   },
   logoutButton: {
     padding: 8,
+    position: 'absolute',
+    left: 20,
   },
   logoutText: {
     color: colors.white,
@@ -182,23 +191,22 @@ const styles = StyleSheet.create({
   },
   ticketHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 15,
+    gap: 10,
   },
   ticketFestivalName: {
     fontSize: 20,
     fontWeight: 'bold',
     color: colors.text,
-    flex: 1,
-    textAlign: 'right',
+    textAlign: 'center',
   },
   ticketBadge: {
     backgroundColor: colors.secondary,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
-    marginLeft: 10,
   },
   ticketBadgeText: {
     color: colors.white,
@@ -212,25 +220,25 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.text,
     marginBottom: 8,
-    textAlign: 'right',
+    textAlign: 'center',
   },
   ticketDate: {
     fontSize: 14,
     color: colors.textLight,
     marginBottom: 8,
-    textAlign: 'right',
+    textAlign: 'center',
   },
   ticketPrice: {
     fontSize: 16,
     fontWeight: 'bold',
     color: colors.primary,
-    textAlign: 'right',
+    textAlign: 'center',
   },
   ticketFooter: {
     borderTopWidth: 1,
     borderTopColor: colors.lightGray,
     paddingTop: 15,
-    alignItems: 'flex-end',
+    alignItems: 'center',
   },
   viewDetailsText: {
     fontSize: 16,

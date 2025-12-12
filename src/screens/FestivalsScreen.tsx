@@ -8,6 +8,7 @@ import {
   Image,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import { festivals } from '../constants/festivals';
 import { colors } from '../constants/colors';
@@ -15,6 +16,7 @@ import { colors } from '../constants/colors';
 export default function FestivalsScreen() {
   const navigation = useNavigation();
   const { logout } = useAuth();
+  const insets = useSafeAreaInsets();
 
   return (
     <View style={styles.container}>
@@ -33,7 +35,10 @@ export default function FestivalsScreen() {
         </Text>
       </View>
 
-      <ScrollView style={styles.content}>
+      <ScrollView 
+        style={styles.content}
+        contentContainerStyle={{ paddingBottom: 100 + insets.bottom }}
+      >
         <Text style={styles.sectionTitle}>تقويم الفعاليات</Text>
         <Text style={styles.sectionSubtitle}>
           استكشف أبرز الفعاليات والمهرجانات في سلطنة عُمان
@@ -134,13 +139,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: colors.primary,
     marginBottom: 10,
-    textAlign: 'right',
+    textAlign: 'center',
   },
   sectionSubtitle: {
     fontSize: 14,
     color: colors.text,
     marginBottom: 20,
-    textAlign: 'right',
+    textAlign: 'center',
   },
   festivalCard: {
     backgroundColor: colors.white,
@@ -172,31 +177,31 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: colors.text,
     marginBottom: 10,
-    textAlign: 'right',
+    textAlign: 'center',
   },
   festivalLocation: {
     fontSize: 14,
     color: colors.textLight,
     marginBottom: 5,
-    textAlign: 'right',
+    textAlign: 'center',
   },
   festivalDate: {
     fontSize: 14,
     color: colors.textLight,
     marginBottom: 5,
-    textAlign: 'right',
+    textAlign: 'center',
   },
   festivalTime: {
     fontSize: 14,
     color: colors.textLight,
     marginBottom: 10,
-    textAlign: 'right',
+    textAlign: 'center',
   },
   festivalDescription: {
     fontSize: 14,
     color: colors.text,
     marginBottom: 15,
-    textAlign: 'right',
+    textAlign: 'center',
     lineHeight: 20,
   },
   festivalFooter: {

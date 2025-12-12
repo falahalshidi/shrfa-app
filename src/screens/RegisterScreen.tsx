@@ -64,7 +64,7 @@ export default function RegisterScreen() {
             placeholderTextColor={colors.textLight}
             value={name}
             onChangeText={setName}
-            textAlign="right"
+            textAlign="center"
           />
 
           <TextInput
@@ -75,7 +75,7 @@ export default function RegisterScreen() {
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
-            textAlign="right"
+            textAlign="center"
           />
 
           <TextInput
@@ -85,7 +85,7 @@ export default function RegisterScreen() {
             value={phone}
             onChangeText={setPhone}
             keyboardType="phone-pad"
-            textAlign="right"
+            textAlign="center"
           />
 
           <TextInput
@@ -95,7 +95,7 @@ export default function RegisterScreen() {
             value={password}
             onChangeText={setPassword}
             secureTextEntry
-            textAlign="right"
+            textAlign="center"
           />
 
           <TextInput
@@ -105,7 +105,7 @@ export default function RegisterScreen() {
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             secureTextEntry
-            textAlign="right"
+            textAlign="center"
           />
 
           <TouchableOpacity style={styles.button} onPress={handleRegister}>
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: colors.text,
     marginBottom: 30,
-    textAlign: 'right',
+    textAlign: 'center',
   },
   input: {
     backgroundColor: '#f5f5f5',
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     padding: 15,
     fontSize: 16,
     marginBottom: 15,
-    textAlign: 'right',
+    textAlign: 'center',
     borderWidth: 1,
     borderColor: colors.lightGray,
   },

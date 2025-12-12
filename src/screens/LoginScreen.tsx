@@ -56,7 +56,7 @@ export default function LoginScreen() {
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
-            textAlign="right"
+            textAlign="center"
           />
 
           <TextInput
@@ -66,7 +66,7 @@ export default function LoginScreen() {
             value={password}
             onChangeText={setPassword}
             secureTextEntry
-            textAlign="right"
+            textAlign="center"
           />
 
           <TouchableOpacity style={styles.button} onPress={handleLogin}>
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: colors.text,
     marginBottom: 30,
-    textAlign: 'right',
+    textAlign: 'center',
   },
   input: {
     backgroundColor: '#f5f5f5',
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
     padding: 15,
     fontSize: 16,
     marginBottom: 15,
-    textAlign: 'right',
+    textAlign: 'center',
     borderWidth: 1,
     borderColor: colors.lightGray,
   },
