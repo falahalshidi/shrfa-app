@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Switch,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -22,6 +23,7 @@ export default function RegisterScreen() {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
   const navigation = useNavigation<any>();
   const { register } = useAuth();
 
@@ -41,7 +43,7 @@ export default function RegisterScreen() {
       return;
     }
 
-    const success = await register(name, email, password, phone || undefined);
+    const success = await register(name, email, password, phone || undefined, isAdmin);
     if (success) {
       Alert.alert('نجح', 'تم إنشاء الحساب. تحقق من بريدك الإلكتروني لتفعيل الحساب ثم قم بتسجيل الدخول.', [
         { text: 'موافق', onPress: () => navigation.goBack() },
@@ -115,6 +117,21 @@ export default function RegisterScreen() {
             textAlign="center"
           />
 
+          <View style={styles.toggleRow}>
+            <View style={styles.toggleTextContainer}>
+              <Text style={styles.toggleLabel}>Is Admin؟</Text>
+              <Text style={styles.toggleDescription}>
+                فعل هذا الخيار فقط للحسابات التي يمكنها الوصول إلى لوحة التحكم
+              </Text>
+            </View>
+            <Switch
+              value={isAdmin}
+              onValueChange={setIsAdmin}
+              trackColor={{ false: colors.lightGray, true: colors.primary }}
+              thumbColor={colors.white}
+            />
+          </View>
+
           <TouchableOpacity style={styles.button} onPress={handleRegister}>
             <Text style={styles.buttonText}>إنشاء الحساب</Text>
           </TouchableOpacity>
@@ -181,6 +198,31 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     borderWidth: 1,
     borderColor: colors.cardBorder,
+  },
+  toggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: colors.white,
+    borderRadius: 16,
+    padding: 16,
+    marginVertical: 10,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
+    gap: 12,
+  },
+  toggleTextContainer: {
+    flex: 1,
+  },
+  toggleLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.primary,
+    marginBottom: 4,
+  },
+  toggleDescription: {
+    fontSize: 13,
+    color: colors.textLight,
   },
   button: {
     backgroundColor: colors.primary,

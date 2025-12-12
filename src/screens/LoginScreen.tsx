@@ -4,6 +4,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  Pressable,
   StyleSheet,
   Alert,
   KeyboardAvoidingView,
@@ -16,9 +17,12 @@ import { useAuth } from '../context/AuthContext';
 import { colors } from '../constants/colors';
 import Logo from '../components/Logo';
 
+type FocusTarget = 'email' | 'password' | null;
+
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [focusedField, setFocusedField] = useState<FocusTarget>(null);
   const navigation = useNavigation<any>();
   const { login } = useAuth();
 
@@ -43,37 +47,71 @@ export default function LoginScreen() {
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <Logo size={280} showTagline={true} />
+          <LinearGradient
+            colors={colors.gradientPrimary}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.headerGradient}
+          >
+            <Logo size={220} showTagline={true} />
+          </LinearGradient>
         </View>
 
         <View style={styles.formCard}>
           <Text style={styles.title}>تسجيل الدخول</Text>
+          <Text style={styles.subtitle}>مرحباً بعودتك إلى قصص «شُرفة»</Text>
 
           <View style={styles.inputGroup}>
-            <TextInput
-              style={styles.input}
-              placeholder="البريد الإلكتروني"
-              placeholderTextColor={colors.textLight}
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              textAlign="center"
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="كلمة المرور"
-              placeholderTextColor={colors.textLight}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              textAlign="center"
-            />
+            <View style={styles.inputField}>
+              <Text style={styles.inputLabel}>البريد الإلكتروني</Text>
+              <TextInput
+                style={[
+                  styles.input,
+                  focusedField === 'email' && styles.inputFocused,
+                ]}
+                placeholder="example@email.com"
+                placeholderTextColor={colors.placeholder}
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                textAlign="center"
+                onFocus={() => setFocusedField('email')}
+                onBlur={() => setFocusedField(null)}
+              />
+            </View>
+            <View style={styles.inputField}>
+              <Text style={styles.inputLabel}>كلمة المرور</Text>
+              <TextInput
+                style={[
+                  styles.input,
+                  focusedField === 'password' && styles.inputFocused,
+                ]}
+                placeholder="********"
+                placeholderTextColor={colors.placeholder}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                textAlign="center"
+                onFocus={() => setFocusedField('password')}
+                onBlur={() => setFocusedField(null)}
+              />
+            </View>
           </View>
 
-          <TouchableOpacity style={styles.button} onPress={handleLogin}>
-            <Text style={styles.buttonText}>تسجيل الدخول</Text>
-          </TouchableOpacity>
+          <Pressable
+            style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
+            onPress={handleLogin}
+          >
+            <LinearGradient
+              colors={colors.gradientSecondary}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.buttonGradient}
+            >
+              <Text style={styles.buttonText}>تسجيل الدخول</Text>
+            </LinearGradient>
+          </Pressable>
 
           <TouchableOpacity
             style={styles.linkButton}
@@ -95,24 +133,38 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
-    padding: 20,
-    gap: 20,
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+    gap: 28,
   },
   header: {
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 30,
-    borderRadius: 24,
-    backgroundColor: '#000000',
-    minHeight: 220,
+    borderRadius: 28,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 6,
+  },
+  headerGradient: {
+    width: '100%',
+    paddingVertical: 32,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   formCard: {
     width: '100%',
+    maxWidth: 420,
+    alignSelf: 'center',
     backgroundColor: colors.cardBackground,
     borderRadius: 24,
-    padding: 25,
+    padding: 28,
     borderWidth: 1,
     borderColor: colors.cardBorder,
+    gap: 22,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.07,
@@ -120,30 +172,69 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   inputGroup: {
-    gap: 12,
+    gap: 18,
+  },
+  inputField: {
+    gap: 8,
+  },
+  inputLabel: {
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: '600',
+    textAlign: 'right',
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     color: colors.primary,
-    marginBottom: 24,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 15,
+    color: colors.textLight,
     textAlign: 'center',
   },
   input: {
-    backgroundColor: colors.white,
+    backgroundColor: '#FFFDFC',
     borderRadius: 14,
-    padding: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
     fontSize: 16,
     textAlign: 'center',
     borderWidth: 1,
     borderColor: colors.cardBorder,
   },
+  inputFocused: {
+    borderColor: colors.secondary,
+    shadowColor: colors.secondary,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 2,
+  },
   button: {
-    backgroundColor: colors.primary,
     borderRadius: 16,
-    paddingVertical: 15,
     alignItems: 'center',
-    marginTop: 25,
+    marginTop: 28,
+    minHeight: 56,
+    justifyContent: 'center',
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  buttonGradient: {
+    width: '100%',
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 18,
+  },
+  buttonPressed: {
+    transform: [{ scale: 0.98 }],
+    opacity: 0.95,
   },
   buttonText: {
     color: colors.white,
@@ -151,12 +242,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   linkButton: {
-    marginTop: 20,
+    marginTop: 32,
     alignItems: 'center',
   },
   linkText: {
-    color: colors.secondary,
+    color: colors.gray,
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '400',
   },
 });

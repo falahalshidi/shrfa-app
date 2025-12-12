@@ -168,7 +168,15 @@ export default function AdminScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>لوحة الإدارة</Text>
+        <View>
+          <Text style={styles.headerTitle}>لوحة الإدارة</Text>
+          {user?.name ? (
+            <Text style={styles.headerSubtitle}>
+              {user.name}
+              {user.email ? ` • ${user.email}` : ''}
+            </Text>
+          ) : null}
+        </View>
         <TouchableOpacity onPress={logout} style={styles.logoutButton}>
           <Text style={styles.logoutText}>تسجيل الخروج</Text>
         </TouchableOpacity>
@@ -362,6 +370,11 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: 'bold',
     color: colors.white,
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.8)',
+    marginTop: 4,
   },
   logoutButton: {
     padding: 8,

@@ -8,7 +8,13 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
-  register: (name: string, email: string, password: string, phone?: string) => Promise<boolean>;
+  register: (
+    name: string,
+    email: string,
+    password: string,
+    phone?: string,
+    isAdmin?: boolean
+  ) => Promise<boolean>;
   logout: () => Promise<void>;
 }
 
@@ -18,6 +24,20 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const isAdminEmail = (email?: string | null) =>
   email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+
+const getMetadataAdminFlag = (authUser: SupabaseAuthUser): boolean | undefined => {
+  const meta = authUser.user_metadata;
+
+  if (typeof meta?.is_admin === 'boolean') {
+    return meta.is_admin;
+  }
+
+  if (typeof meta?.isAdmin === 'boolean') {
+    return meta.isAdmin;
+  }
+
+  return undefined;
+};
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -69,6 +89,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     authUser: SupabaseAuthUser,
     options?: { name?: string; phone?: string; isAdmin?: boolean }
   ): Promise<Tables<'profiles'>> => {
+    const metadataFlag = getMetadataAdminFlag(authUser);
+    const isAdminFlag =
+      typeof options?.isAdmin === 'boolean'
+        ? options.isAdmin
+        : metadataFlag ?? isAdminEmail(authUser.email);
+
     const { data, error } = await supabase
       .from('profiles')
       .upsert(
@@ -84,7 +110,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             (typeof authUser.user_metadata?.phone === 'string'
               ? authUser.user_metadata.phone
               : null),
-          is_admin: options?.isAdmin ?? isAdminEmail(authUser.email),
+          is_admin: isAdminFlag,
         },
         { onConflict: 'id' }
       )
@@ -102,7 +128,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     profile: Tables<'profiles'>,
     authUser: SupabaseAuthUser
   ): Promise<Tables<'profiles'>> => {
-    if (profile.is_admin || !isAdminEmail(authUser.email)) {
+    const metadataFlag = getMetadataAdminFlag(authUser);
+    const shouldBeAdmin = metadataFlag ?? isAdminEmail(authUser.email);
+
+    if (profile.is_admin || !shouldBeAdmin) {
       return profile;
     }
 
@@ -120,17 +149,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return data as Tables<'profiles'>;
   };
 
-  const mapUser = (authUser: SupabaseAuthUser, profile: Tables<'profiles'> | null): User => ({
-    id: authUser.id,
-    email: authUser.email || '',
-    name:
-      profile?.full_name ||
-      (typeof authUser.user_metadata?.full_name === 'string'
-        ? authUser.user_metadata.full_name
-        : authUser.email || 'مستخدم'),
-    phone: profile?.phone || undefined,
-    isAdmin: Boolean(profile?.is_admin || isAdminEmail(authUser.email)),
-  });
+  const mapUser = (authUser: SupabaseAuthUser, profile: Tables<'profiles'> | null): User => {
+    const metadataFlag = getMetadataAdminFlag(authUser);
+    const resolvedIsAdmin =
+      typeof profile?.is_admin === 'boolean'
+        ? profile.is_admin
+        : metadataFlag ?? isAdminEmail(authUser.email);
+
+    return {
+      id: authUser.id,
+      email: authUser.email || '',
+      name:
+        profile?.full_name ||
+        (typeof authUser.user_metadata?.full_name === 'string'
+          ? authUser.user_metadata.full_name
+          : authUser.email || 'مستخدم'),
+      phone: profile?.phone || undefined,
+      isAdmin: resolvedIsAdmin,
+    };
+  };
 
   const syncUser = async (authUser: SupabaseAuthUser) => {
     try {
@@ -168,7 +205,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     name: string,
     email: string,
     password: string,
-    phone?: string
+    phone?: string,
+    isAdmin?: boolean
   ): Promise<boolean> => {
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -178,6 +216,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           data: {
             full_name: name,
             phone: phone || '',
+            is_admin: Boolean(isAdmin),
           },
         },
       });

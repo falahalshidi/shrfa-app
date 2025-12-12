@@ -16,6 +16,7 @@ export const colors = {
   cardBackground: '#FFFBF6',
   cardBorder: '#F0DED0',
   success: '#4CAF50',
+  placeholder: '#5C5C5C',
   gradientPrimary: ['#B23A48', '#670C12'] as [string, string],
   gradientSecondary: ['#F4A261', '#E76F51'] as [string, string],
 };

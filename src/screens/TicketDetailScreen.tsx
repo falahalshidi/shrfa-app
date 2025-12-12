@@ -8,6 +8,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useRoute } from '@react-navigation/native';
+import QRCode from 'react-native-qrcode-svg';
 import { colors } from '../constants/colors';
 import { Ticket } from '../types';
 
@@ -40,7 +41,10 @@ export default function TicketDetailScreen() {
         </View>
 
         <View style={styles.barcodeContainer}>
-          <Text style={styles.barcodeLabel}>رمز الباركود</Text>
+          <Text style={styles.barcodeLabel}>رمز QR</Text>
+          <View style={styles.barcodeWrapper}>
+            <QRCode value={ticket.barcode} size={160} backgroundColor="transparent" />
+          </View>
           <Text style={styles.barcodeValue}>{ticket.barcode}</Text>
         </View>
 
@@ -158,6 +162,14 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderColor: colors.cardBorder,
+  },
+  barcodeWrapper: {
+    padding: 12,
+    backgroundColor: colors.white,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
+    marginBottom: 10,
   },
   barcodeLabel: {
     fontSize: 16,

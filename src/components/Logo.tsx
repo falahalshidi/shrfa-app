@@ -72,10 +72,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   tagline: {
-    color: '#B0B0B0',
+    color: '#F2EDE4',
     textAlign: 'center',
     marginTop: 8,
     fontWeight: '400',
   },
 });
-
