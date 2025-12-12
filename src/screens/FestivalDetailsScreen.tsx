@@ -100,6 +100,8 @@ export default function FestivalDetailsScreen() {
     // Update daily booking count
     await incrementDailyBooking(user.id, today, quantity);
 
+    // Profit is automatically calculated from tickets, no need to add manually
+
     Alert.alert(
       'نجح',
       `تم شراء ${quantity} تذكرة بنجاح!`,

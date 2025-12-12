@@ -112,9 +112,6 @@ export default function MyTicketsScreen() {
               <Text style={styles.ticketDate}>
                 تاريخ الشراء: {new Date(ticket.purchaseDate).toLocaleDateString('ar-OM')}
               </Text>
-              <Text style={styles.ticketPrice}>
-                السعر: {ticket.totalPrice} بيسة
-              </Text>
             </View>
             <View style={styles.ticketFooter}>
               <Text style={styles.viewDetailsText}>عرض التفاصيل →</Text>
@@ -226,12 +223,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.textLight,
     marginBottom: 8,
-    textAlign: 'center',
-  },
-  ticketPrice: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: colors.primary,
     textAlign: 'center',
   },
   ticketFooter: {

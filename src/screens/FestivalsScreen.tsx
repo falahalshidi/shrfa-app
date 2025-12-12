@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,16 +7,34 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
-import { festivals } from '../constants/festivals';
+import { festivals as defaultFestivals } from '../constants/festivals';
 import { colors } from '../constants/colors';
+import { getAllFestivals } from '../utils/storage';
+import { Festival } from '../constants/festivals';
 
 export default function FestivalsScreen() {
   const navigation = useNavigation();
   const { logout } = useAuth();
   const insets = useSafeAreaInsets();
+  const [festivals, setFestivals] = useState<Festival[]>(defaultFestivals);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      loadFestivals();
+    }, [])
+  );
+
+  const loadFestivals = async () => {
+    const storedFestivals = await getAllFestivals();
+    if (storedFestivals.length > 0) {
+      setFestivals(storedFestivals);
+    } else {
+      setFestivals(defaultFestivals);
+    }
+  };
 
   return (
     <View style={styles.container}>

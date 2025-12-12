@@ -1,9 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ticket, Booking } from '../types';
+import { Festival } from '../constants/festivals';
 
 const TICKETS_KEY = 'tickets';
 const BOOKINGS_KEY = 'bookings';
 const DAILY_BOOKINGS_KEY = 'daily_bookings';
+const PROFIT_KEY = 'total_profit';
+const FESTIVALS_KEY = 'festivals';
 
 export async function saveTicket(ticket: Ticket): Promise<void> {
   try {
@@ -91,6 +94,100 @@ export async function getBookingsByUser(userId: string): Promise<Booking[]> {
   } catch (error) {
     console.error('Error getting bookings:', error);
     return [];
+  }
+}
+
+export async function getAllTickets(): Promise<Ticket[]> {
+  try {
+    const ticketsData = await AsyncStorage.getItem(TICKETS_KEY);
+    return ticketsData ? JSON.parse(ticketsData) : [];
+  } catch (error) {
+    console.error('Error getting all tickets:', error);
+    return [];
+  }
+}
+
+export async function getAllBookings(): Promise<Booking[]> {
+  try {
+    const bookingsData = await AsyncStorage.getItem(BOOKINGS_KEY);
+    return bookingsData ? JSON.parse(bookingsData) : [];
+  } catch (error) {
+    console.error('Error getting all bookings:', error);
+    return [];
+  }
+}
+
+export async function addProfit(amount: number): Promise<void> {
+  try {
+    const currentProfit = await getTotalProfit();
+    const newProfit = currentProfit + amount;
+    await AsyncStorage.setItem(PROFIT_KEY, JSON.stringify(newProfit));
+  } catch (error) {
+    console.error('Error adding profit:', error);
+    throw error;
+  }
+}
+
+export async function getTotalProfit(): Promise<number> {
+  try {
+    // Always calculate profit from existing tickets to ensure accuracy
+    const allTickets = await getAllTickets();
+    
+    // Calculate profit by summing all ticket prices
+    const calculatedProfit = allTickets.reduce((sum, ticket) => {
+      // Ensure totalPrice exists and is a valid number
+      const price = ticket.totalPrice || 0;
+      return sum + (typeof price === 'number' ? price : 0);
+    }, 0);
+    
+    // Always update stored profit to match calculated value
+    await AsyncStorage.setItem(PROFIT_KEY, JSON.stringify(calculatedProfit));
+    
+    return calculatedProfit;
+  } catch (error) {
+    console.error('Error getting total profit:', error);
+    return 0;
+  }
+}
+
+export async function saveFestival(festival: Festival): Promise<void> {
+  try {
+    const festivalsData = await AsyncStorage.getItem(FESTIVALS_KEY);
+    const festivals = festivalsData ? JSON.parse(festivalsData) : [];
+    const existingIndex = festivals.findIndex((f: Festival) => f.id === festival.id);
+    
+    if (existingIndex >= 0) {
+      festivals[existingIndex] = festival;
+    } else {
+      festivals.push(festival);
+    }
+    
+    await AsyncStorage.setItem(FESTIVALS_KEY, JSON.stringify(festivals));
+  } catch (error) {
+    console.error('Error saving festival:', error);
+    throw error;
+  }
+}
+
+export async function getAllFestivals(): Promise<Festival[]> {
+  try {
+    const festivalsData = await AsyncStorage.getItem(FESTIVALS_KEY);
+    return festivalsData ? JSON.parse(festivalsData) : [];
+  } catch (error) {
+    console.error('Error getting festivals:', error);
+    return [];
+  }
+}
+
+export async function deleteFestival(festivalId: string): Promise<void> {
+  try {
+    const festivalsData = await AsyncStorage.getItem(FESTIVALS_KEY);
+    const festivals = festivalsData ? JSON.parse(festivalsData) : [];
+    const filtered = festivals.filter((f: Festival) => f.id !== festivalId);
+    await AsyncStorage.setItem(FESTIVALS_KEY, JSON.stringify(filtered));
+  } catch (error) {
+    console.error('Error deleting festival:', error);
+    throw error;
   }
 }
 

@@ -24,7 +24,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const userData = await AsyncStorage.getItem('user');
       if (userData) {
-        setUser(JSON.parse(userData));
+        const user = JSON.parse(userData);
+        // Ensure admin status is set correctly
+        if (user.email === 'shrfa@gmail.com') {
+          user.isAdmin = true;
+          await AsyncStorage.setItem('user', JSON.stringify(user));
+          
+          // Also update in users array
+          const usersData = await AsyncStorage.getItem('users');
+          if (usersData) {
+            const users = JSON.parse(usersData);
+            const userIndex = users.findIndex((u: any) => u.email === user.email);
+            if (userIndex >= 0) {
+              users[userIndex].isAdmin = true;
+              await AsyncStorage.setItem('users', JSON.stringify(users));
+            }
+          }
+        }
+        setUser(user);
       }
     } catch (error) {
       console.error('Error loading user:', error);
@@ -44,12 +61,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       );
 
       if (foundUser) {
+        const isAdmin = email === 'shrfa@gmail.com';
         const userData: User = {
           id: foundUser.id,
           email: foundUser.email,
           name: foundUser.name,
           phone: foundUser.phone,
+          isAdmin: isAdmin,
         };
+        
+        // Update user in users array with admin status
+        if (isAdmin) {
+          foundUser.isAdmin = true;
+          await AsyncStorage.setItem('users', JSON.stringify(users));
+        }
+        
         await AsyncStorage.setItem('user', JSON.stringify(userData));
         setUser(userData);
         return true;
@@ -82,6 +108,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email,
         password,
         phone,
+        isAdmin: email === 'shrfa@gmail.com',
       };
 
       users.push(newUser);
@@ -92,6 +119,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email: newUser.email,
         name: newUser.name,
         phone: newUser.phone,
+        isAdmin: newUser.isAdmin,
       };
       await AsyncStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);

@@ -11,6 +11,7 @@ import FestivalsScreen from './src/screens/FestivalsScreen';
 import FestivalDetailsScreen from './src/screens/FestivalDetailsScreen';
 import MyTicketsScreen from './src/screens/MyTicketsScreen';
 import TicketDetailScreen from './src/screens/TicketDetailScreen';
+import AdminScreen from './src/screens/AdminScreen';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { colors } from './src/constants/colors';
 import CustomTabBar from './src/components/CustomTabBar';
@@ -80,6 +81,14 @@ function AppNavigator() {
               name="Register"
               component={RegisterScreen}
               options={{ title: 'إنشاء حساب' }}
+            />
+          </>
+        ) : (user.isAdmin === true || user.email === 'shrfa@gmail.com') ? (
+          <>
+            <Stack.Screen
+              name="Admin"
+              component={AdminScreen}
+              options={{ headerShown: false }}
             />
           </>
         ) : (

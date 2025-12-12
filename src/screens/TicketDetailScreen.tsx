@@ -42,11 +42,6 @@ export default function TicketDetailScreen() {
           </View>
 
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>السعر:</Text>
-            <Text style={styles.detailValue}>{ticket.totalPrice} بيسة</Text>
-          </View>
-
-          <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>الكمية:</Text>
             <Text style={styles.detailValue}>{ticket.quantity} تذكرة</Text>
           </View>

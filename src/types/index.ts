@@ -3,6 +3,7 @@ export interface User {
   email: string;
   name: string;
   phone?: string;
+  isAdmin?: boolean;
 }
 
 export interface Ticket {
