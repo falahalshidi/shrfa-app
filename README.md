@@ -162,8 +162,3 @@ shr/
 **ملاحظة**: هذا التطبيق في مرحلة التطوير. قد تحتوي بعض الميزات على أخطاء أو تحتاج إلى تحسينات.
 
 
-**suapabase for .env file**
-EXPO_PUBLIC_SUPABASE_URL=https://gwpbvoieyreykgqbcvgd.supabase.co
-EXPO_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3cGJ2b2lleXJleWtncWJjdmdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU1MjUzNzAsImV4cCI6MjA4MTEwMTM3MH0.0ImMaUgOSyD5x0fwH1A6FuFblf_kRVqtZ4pR-7yBVR4
-
-

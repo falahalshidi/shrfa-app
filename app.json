@@ -13,7 +13,14 @@
       "backgroundColor": "#000000"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.shrfa.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "CFBundleDisplayName": "شرفة",
+        "CFBundleName": "شرفة",
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -24,6 +31,11 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "6786a8b1-542e-4500-a355-5bebaa653b68"
+      }
     }
   }
 }

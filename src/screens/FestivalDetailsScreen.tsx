@@ -129,20 +129,6 @@ export default function FestivalDetailsScreen() {
             <Text style={styles.heroTitle}>{festival.name}</Text>
             <Text style={styles.heroSubtitle}>{festival.location}</Text>
           </View>
-          <View style={styles.priceTag}>
-            <Text style={styles.priceTagLabel}>السعر</Text>
-            <Text style={styles.priceTagValue}>{festival.price} بيسة</Text>
-          </View>
-        </View>
-        <View style={styles.heroMeta}>
-          <View style={styles.metaItem}>
-            <Ionicons name="calendar-outline" size={18} color={colors.white} />
-            <Text style={styles.metaText}>{festival.startDate} - {festival.endDate}</Text>
-          </View>
-          <View style={styles.metaItem}>
-            <Ionicons name="time-outline" size={18} color={colors.white} />
-            <Text style={styles.metaText}>{festival.workingHours}</Text>
-          </View>
         </View>
       </LinearGradient>
 
@@ -211,7 +197,7 @@ export default function FestivalDetailsScreen() {
       </View>
 
       <TouchableOpacity style={styles.purchaseButton} onPress={handlePurchase}>
-        <Text style={styles.purchaseButtonText}>متابعة إلى الحفظ</Text>
+        <Text style={styles.purchaseButtonText}>ادفع الآن</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.helpButton}>
@@ -264,20 +250,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
   },
-  heroMeta: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  metaItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  metaText: {
-    color: colors.white,
-    fontSize: 14,
-  },
   detailsCard: {
     backgroundColor: colors.cardBackground,
     margin: 20,
@@ -302,18 +274,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    marginBottom: 12,
+    marginBottom: 16,
+    justifyContent: 'flex-end',
   },
   detailText: {
     fontSize: 16,
     color: colors.text,
     flex: 1,
+    textAlign: 'right',
   },
   activitiesWrap: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 10,
-    marginTop: 10,
+    marginTop: 20,
+    justifyContent: 'flex-end',
   },
   activityPill: {
     backgroundColor: colors.highlight,

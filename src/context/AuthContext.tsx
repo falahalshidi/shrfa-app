@@ -12,9 +12,8 @@ interface AuthContextType {
     name: string,
     email: string,
     password: string,
-    phone?: string,
-    isAdmin?: boolean
-  ) => Promise<boolean>;
+    phone?: string
+  ) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
 }
 
@@ -24,6 +23,30 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const isAdminEmail = (email?: string | null) =>
   email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+
+// Translate error messages to Arabic
+const translateError = (errorMessage: string): string => {
+  const lowerError = errorMessage.toLowerCase();
+  
+  if (lowerError.includes('invalid email') || (lowerError.includes('email address') && lowerError.includes('invalid'))) {
+    return 'عنوان البريد الإلكتروني غير صالح';
+  }
+  if (lowerError.includes('already registered') || lowerError.includes('user already registered') || lowerError.includes('email already exists')) {
+    return 'البريد الإلكتروني مستخدم بالفعل';
+  }
+  if (lowerError.includes('password')) {
+    if (lowerError.includes('short') || lowerError.includes('weak')) {
+      return 'كلمة المرور ضعيفة جداً';
+    }
+    return 'كلمة المرور غير صحيحة';
+  }
+  if (lowerError.includes('user not found')) {
+    return 'المستخدم غير موجود';
+  }
+  
+  // Return Arabic version for common errors, otherwise return the original message
+  return errorMessage;
+};
 
 const getMetadataAdminFlag = (authUser: SupabaseAuthUser): boolean | undefined => {
   const meta = authUser.user_metadata;
@@ -205,9 +228,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     name: string,
     email: string,
     password: string,
-    phone?: string,
-    isAdmin?: boolean
-  ): Promise<boolean> => {
+    phone?: string
+  ): Promise<{ success: boolean; error?: string }> => {
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -216,13 +238,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           data: {
             full_name: name,
             phone: phone || '',
-            is_admin: Boolean(isAdmin),
           },
         },
       });
 
-      if (error || !data.user) {
-        return false;
+      if (error) {
+        // Translate error messages to Arabic
+        const translatedError = translateError(error.message || 'حدث خطأ أثناء إنشاء الحساب');
+        
+        // Check for specific error codes or messages
+        if (error.message?.toLowerCase().includes('already registered') || 
+            error.message?.toLowerCase().includes('user already registered') ||
+            error.code === 'email_exists') {
+          return { success: false, error: 'البريد الإلكتروني مستخدم بالفعل' };
+        }
+        return { success: false, error: translatedError };
+      }
+
+      if (!data.user) {
+        return { success: false, error: 'حدث خطأ أثناء إنشاء الحساب' };
+      }
+
+      // Check if user already exists by checking identities array
+      // If identities is empty, it means the email already exists
+      if (!data.user.identities || data.user.identities.length === 0) {
+        return { success: false, error: 'البريد الإلكتروني مستخدم بالفعل' };
       }
 
       if (!data.session) {
@@ -231,10 +271,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await syncUser(data.user);
       }
 
-      return true;
-    } catch (error) {
+      return { success: true };
+    } catch (error: any) {
       console.error('Error registering:', error);
-      return false;
+      // Translate error messages to Arabic
+      const errorMessage = error?.message || 'حدث خطأ أثناء إنشاء الحساب';
+      const translatedError = translateError(errorMessage);
+      
+      // Check if it's a duplicate email error
+      if (error?.message?.toLowerCase().includes('already') || 
+          error?.message?.toLowerCase().includes('exists') ||
+          error?.code === 'email_exists') {
+        return { success: false, error: 'البريد الإلكتروني مستخدم بالفعل' };
+      }
+      return { success: false, error: translatedError };
     }
   };
 
